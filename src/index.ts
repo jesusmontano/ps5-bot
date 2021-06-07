@@ -1,89 +1,91 @@
-import axios from 'axios';
-import cheerio from 'cheerio';
+import axios from 'axios'
+import cheerio from 'cheerio'
+import { Retailer } from './types'
 
-const AxiosInstance = axios.create();
+const AxiosInstance = axios.create()
 
 const retailers: Retailer[] = [
     {
         name: 'Amazon',
         url: 'https://www.amazon.com/gp/product/B08FC5L3RG/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1',
-        version: 'Disc'
+        version: 'Disc',
     },
     {
         name: 'Best Buy',
         url: 'https://www.bestbuy.com/site/sony-playstation-5-console/6426149.p?skuId=6426149',
-        version: 'Disc'
+        version: 'Disc',
     },
     {
         name: 'Best Buy',
         url: 'https://www.bestbuy.com/site/sony-playstation-5-digital-edition-console/6430161.p?skuId=6430161',
-        version: 'Digital'
+        version: 'Digital',
     },
     {
         name: 'Gamestop',
         url: 'https://www.gamestop.com/video-games/playstation-5/consoles/products/playstation-5-digital-edition/11108141.html',
-        version: 'Digital'
+        version: 'Digital',
     },
 ]
 
-const checkSellerAvailability = async(retailer: Retailer): Promise<boolean> => {
-    let available = false;
+const checkSellerAvailability = async (
+    retailer: Retailer
+): Promise<boolean> => {
+    let available = false
 
     await AxiosInstance.get(retailer.url)
         .then((response) => {
-            const html = response.data;
-            const $ = cheerio.load(html);
+            const html = response.data
+            const $ = cheerio.load(html)
             if (retailer.name === 'Amazon') {
-                const elementToFind = $('#add-to-cart-button');
+                const elementToFind = $('#add-to-cart-button')
                 if (elementToFind.length) {
-                    available = true;
+                    available = true
                 }
             } else if (retailer.name === 'Best Buy') {
-                const elementToFind = $('.add-to-cart-button');
+                const elementToFind = $('.add-to-cart-button')
                 if (elementToFind.text() === 'Add to Cart') {
-                    available = true;
+                    available = true
                 }
             } else if (retailer.name === 'Gamestop') {
                 const elementToFind = $('.add-to-cart')
                 if (elementToFind.text() === 'Add to Cart') {
-                    available = true;
+                    available = true
                 }
             }
         })
-        .catch(e => {
-            console.log(`Error retrieving information for PlayStation 5 (${retailer.version}) from ${retailer.name}. Availability is assumed to be false.`);
-        });
-    
-    return available;
+        .catch((e) => {
+            console.log(
+                `Error retrieving information for PlayStation 5 (${retailer.version}) from ${retailer.name}. Availability is assumed to be false.`
+            )
+        })
+
+    return available
 }
 
-const checkSellers = async (): Promise<{ available: Retailer[]; unavailable: Retailer[]; }> => {
-    let available = [];
-    let unavailable = [];
-    
+const checkSellers = async (): Promise<{
+    available: Retailer[]
+    unavailable: Retailer[]
+}> => {
+    let available = []
+    let unavailable = []
+
     for (let retailer of retailers) {
-        const availability = await checkSellerAvailability(retailer);
-        if (availability) available.push(retailer);
-        else unavailable.push(retailer);
+        const availability = await checkSellerAvailability(retailer)
+        if (availability) available.push(retailer)
+        else unavailable.push(retailer)
     }
 
-    if (available.length) console.log('\u0007');
-    
-    return {available, unavailable}
-};
+    if (available.length) console.log('\u0007')
+
+    return { available, unavailable }
+}
 
 const refreshData = (): void => {
-    checkSellers().then(result => {
-        console.log(`Below are the results for ${new Date()}`);
+    checkSellers().then((result) => {
+        console.log(`Below are the results for ${new Date()}`)
         console.log(result)
-    });
-    setTimeout(refreshData, 10000);
+    })
+    setTimeout(refreshData, 10000)
 }
 
-refreshData();
-
-interface Retailer {
-    name: string;
-    url: string;
-    version: string;
-}
+refreshData()
