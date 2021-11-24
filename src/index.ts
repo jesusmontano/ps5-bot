@@ -9,14 +9,6 @@ const authToken = process.env.TWILIO_AUTH_TOKEN
 
 const client = new twilio(accountSid, authToken)
 
-client.messages
-    .create({
-        body: 'Hello! This is PS5 Bot.',
-        from: process.env.TWILIO_PHONE_NUMBER,
-        to: process.env.PERSONAL_PHONE_NUMBER,
-    })
-    .then((message) => console.log(message))
-
 const AxiosInstance = axios.create()
 
 const retailers: Retailer[] = [
@@ -39,6 +31,11 @@ const retailers: Retailer[] = [
         name: 'Gamestop',
         url: 'https://www.gamestop.com/video-games/playstation-5/consoles/products/playstation-5-digital-edition/11108141.html',
         version: 'Digital',
+    },
+    {
+        name: 'Gamestop',
+        url: 'https://www.gamestop.com/video-games/playstation-5/consoles/products/playstation-5/11108140.html',
+        version: 'Disc',
     },
 ]
 
@@ -90,7 +87,15 @@ const checkSellers = async (): Promise<{
         else unavailable.push(retailer)
     }
 
-    if (available.length) console.log('\u0007')
+    if (available.length) {
+        console.log('\u0007');
+        client.messages
+        .create({
+            body: `Hello! This is PS5 Bot. The PS5 is in stock at the following retailers: ${available.join(' ')}`,
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to: process.env.PERSONAL_PHONE_NUMBER,
+        })
+    }
 
     return { available, unavailable }
 }
