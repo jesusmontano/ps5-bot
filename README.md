@@ -1,0 +1,1 @@
+A TypeScript app used to send text message alerts through Twilio when a PS5 is in stock at any of the retailers supported by this app.
